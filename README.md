@@ -1,4 +1,4 @@
-# TEST CASE FOR IRTEYA
+# TEST CASE FOR TELECOM
 нужен playbook для разворачивания nginx в docker compose, который:
 1. положит compose на ФС
 2. в композе должен быть nginx и letsencrypt certbot
