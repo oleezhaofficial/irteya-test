@@ -1,0 +1,9 @@
+- name: Deploy HTTP nginx configs 
+  template:
+    src: default.conf.j2
+    dest: "/srv/nginx-compose/nginx_conf/{{ item.domain }}.conf"
+  loop: "{{ domains }}"
+
+- name: Reload nginx container for safety
+  command: docker kill -s HUP nginx
+  ignore_errors: true

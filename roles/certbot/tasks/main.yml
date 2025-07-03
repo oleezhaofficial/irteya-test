@@ -1,0 +1,22 @@
+- name: Update letsencrypt certs for domains
+  shell: |
+    docker run --rm \
+      -v /srv/nginx-compose/letsencrypt:/etc/letsencrypt \
+      -v /srv/nginx-compose/robots.txt:/usr/share/nginx/html/robots.txt:ro \
+      -v /srv/nginx-compose/nginx_conf:/etc/nginx/conf.d \
+      -v /srv/nginx-compose/nginx_conf:/etc/nginx/conf.d \
+      certbot/certbot:2.10.0 certonly --webroot \
+      -w /usr/share/nginx/html \
+      --noninteractive --agree-tos --email admin@{{ item.domain }} \
+      -d {{ item.domain }}
+  loop: "{{ domains }}"
+
+- name: Deploy HTTPS nginx configs for domains
+  template:
+    src: ssl.conf.j2
+    dest: "/srv/nginx-compose/nginx_conf/{{ item.domain }}.conf"
+  loop: "{{ domains }}"
+
+- name: Reload nginx container to apply SSL configs
+  command: docker kill -s HUP nginx
+  ignore_errors: true

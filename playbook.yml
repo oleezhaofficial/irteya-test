@@ -1,0 +1,22 @@
+---
+- hosts: webservers
+  become: true
+  vars:
+    domains:
+      - domain: example.com
+        basic_auth: true
+        auth_users:
+          - user: ${EXAMPLE_USER}
+            password: ${EXAMPLE_PASSWORD}
+        locations:
+          - /
+          - /api
+      - domain: another.com
+        basic_auth: false
+        locations:
+          - /
+  roles:
+    - docker_compose
+    - nginx
+    - certbot
+    - basic_auth

@@ -1,0 +1,21 @@
+server {
+    listen 80;
+    server_name {{ item.domain }};
+    {% if item.basic_auth %}
+    auth_basic "Protected zone";
+    auth_basic_user_file /etc/nginx/conf.d/{{ item.domain }}.htpasswd;
+    {% endif %}
+    {% for location in item.locations %}
+    location {{ location }} {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ =404;
+    }
+    {% endfor %}
+    location /.well-known/acme-challenge/ {
+        root /usr/share/nginx/html;
+        allow all;
+    }
+    location /robots.txt {
+        alias /usr/share/nginx/html/robots.txt;
+    }
+}

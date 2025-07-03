@@ -1,0 +1,23 @@
+services:
+  nginx:
+    image: nginx:${NGINX_TAG}
+    container_name: nginx
+    volumes:
+      - ./nginx_conf:/etc/nginx/conf.d
+      - ./letsencrypt:/etc/letsencrypt
+      - ./robots.txt:/usr/share/nginx/html/robots.txt:ro
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+
+  certbot:
+    image: certbot/certbot:${CERTBOT_TAG}
+    container_name: certbot
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./nginx_conf:/etc/nginx/conf.d
+      - ./robots.txt:/usr/share/nginx/html/robots.txt:ro
+    entrypoint: /bin/sh
+    depends_on:
+      - nginx

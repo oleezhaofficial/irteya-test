@@ -1,0 +1,35 @@
+- name: Ensure docker and docker-compose are installed
+  package:
+    name: ['docker', 'docker-compose']
+    state: present
+
+- name: Create service folder
+  file:
+    path: /srv/nginx-compose
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /srv/nginx-compose/docker-compose.yml
+
+- name: Copy robots.txt 
+  copy:
+    src: robots.txt
+    dest: /srv/nginx-compose/robots.txt
+
+- name: Create directory for Nginx configs
+  file:
+    path: /srv/nginx-compose/nginx_conf
+    state: directory
+
+- name: Create directory for letsencrypt data
+  file:
+    path: /srv/nginx-compose/letsencrypt
+    state: directory
+
+- name: Start containers
+  command: docker-compose -f /srv/nginx-compose/docker-compose.yml up -d
+  args:
+    chdir: /srv/nginx-compose

@@ -1,0 +1,31 @@
+- name: Ensure htpasswd utility is present (Debian/Ubuntu)
+  apt:
+    name: apache2-utils
+    state: present
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Ensure htpasswd utility is present (RHEL/CentOS)
+  yum:
+    name: httpd-tools
+    state: present
+  become: true
+  when: ansible_os_family == "RedHat"
+
+- name: Create htpasswd file for each domain with basic_auth
+  vars:
+    domain_users: "{{ item.auth_users | default([]) }}"
+  when: item.basic_auth and (domain_users|length > 0)
+  block:
+    - name: Remove previous htpasswd
+      file:
+        path: "/srv/nginx-compose/nginx_conf/{{ item.domain }}.htpasswd"
+        state: absent
+    - name: Generate htpasswd file
+      shell: |
+        {% for userpair in domain_users %}
+        htpasswd -bcn {{ "/srv/nginx-compose/nginx_conf/" + item.domain + ".htpasswd" }} "{{ userpair.user }}" "{{ userpair.password }}"
+        {% endfor %}
+      args:
+        executable: /bin/bash
+  loop: "{{ domains }}"
